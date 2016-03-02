@@ -23,13 +23,13 @@ public class GameStateManager {
 	public GameStateManager()
 	{
 		loadPictures();
-		BattleState bs = new BattleState(this);
-		currentState = bs;
-		Game.mainPanel.add(bs);
+//		BattleState bs = new BattleState(this);
+//		currentState = bs;
+//		Game.mainPanel.add(bs);
 		
-//		EditorState es = new EditorState(this);
-//		currentState = es;
-//		Game.mainPanel.add(es);
+		EditorState es = new EditorState(this);
+		currentState = es;
+		Game.mainPanel.add(es);
 	}
 	
 	private void loadPictures() {

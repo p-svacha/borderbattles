@@ -5,6 +5,8 @@ import java.awt.Cursor;
 import java.awt.Graphics2D;
 import java.awt.Point;
 import java.awt.Rectangle;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -33,12 +35,32 @@ public class EditorState extends MapState {
 	private static final int MOUSE_CENTER_SELECTION_MODE = 1;
 	private static final int MOUSE_ADD_NEIGHBOUR_MODE = 2;
 	
+	private KeyListener nameFieldKL;
+	
 	public EditorState(GameStateManager gsm){
 		super(gsm);
+		
+		nameFieldKL = new KeyListener() {
+			public void keyPressed(KeyEvent k) {
+				if(k.getKeyCode() == KeyEvent.VK_ENTER) {
+					areas.get(clickedArea).setName(nameField.getText());
+					replaceAreaNameInTxt(clickedArea, nameField.getText());
+					requestFocus();
+				}
+				else if(k.getKeyCode() == KeyEvent.VK_MULTIPLY) {
+					mouseMode = MOUSE_CENTER_SELECTION_MODE;
+					requestFocus();
+					Game.mainPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));
+				}
+			}
+			public void keyReleased(KeyEvent k) {}
+			public void keyTyped(KeyEvent arg0) {}
+		};
 		
 		nameField = new JTextField("");
 		nameField.setBounds(10,890,200,20);
 		nameField.addKeyListener(mapMovementKL);
+		nameField.addKeyListener(nameFieldKL);
 		nameButton = new JButton("Set Name");
 		nameButton.setBounds(210,890,100,20);
 		centerButton = new JButton("Set Center");
@@ -116,7 +138,7 @@ public class EditorState extends MapState {
 			Game.mainPanel.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
 		}
 		else if(mouseMode == MOUSE_ADD_NEIGHBOUR_MODE) {
-			if(mouseArea >= 0 && mouseArea != clickedArea && !areas.get(clickedArea).getNeighbours().contains(areas.get(clickedArea))) {
+			if(mouseArea >= 0 && mouseArea != clickedArea && !areas.get(clickedArea).getNeighbours().contains(areas.get(mouseArea))) {
 				addNeighbourInTxt(clickedArea, mouseArea);
 				areas.get(clickedArea).addNeighbour(areas.get(mouseArea));
 				areas.get(mouseArea).addNeighbour(areas.get(clickedArea));
@@ -165,10 +187,10 @@ public class EditorState extends MapState {
 				i++;
 			}
 			
-			String[] splittedLine = lines[areaId].split(" ");
+			String[] splittedLine = lines[areaId].split(",");
 			splittedLine[1] = newName;
 			StringBuilder sb = new StringBuilder();
-			for(String s : splittedLine) sb.append(s + " ");
+			for(String s : splittedLine) sb.append(s + ",");
 			lines[areaId] = sb.toString();
 			
 			writer = new BufferedWriter(new FileWriter(new File("res/maps/"+mapName+".txt")));
@@ -207,11 +229,11 @@ public class EditorState extends MapState {
 				i++;
 			}
 			
-			String[] splittedLine = lines[areaId].split(" ");
+			String[] splittedLine = lines[areaId].split(",");
 			splittedLine[2] = Integer.toString(newCenter.x);
 			splittedLine[3] = Integer.toString(newCenter.y);
 			StringBuilder sb = new StringBuilder();
-			for(String s : splittedLine) sb.append(s + " ");
+			for(String s : splittedLine) sb.append(s + ",");
 			lines[areaId] = sb.toString();
 			
 			writer = new BufferedWriter(new FileWriter(new File("res/maps/"+mapName+".txt")));
@@ -250,8 +272,8 @@ public class EditorState extends MapState {
 				i++;
 			}
 			
-			lines[areaId] = lines[areaId] + neighbourId + " ";
-			lines[neighbourId] = lines[neighbourId] + areaId + " ";
+			lines[areaId] = lines[areaId] + neighbourId + ",";
+			lines[neighbourId] = lines[neighbourId] + areaId + ",";
 			
 			writer = new BufferedWriter(new FileWriter(new File("res/maps/"+mapName+".txt")));
 			for(String s : lines) {

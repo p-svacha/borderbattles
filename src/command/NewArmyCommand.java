@@ -1,16 +1,21 @@
 package command;
 
 import gameState.BattleState;
+import player.Player;
 
 public class NewArmyCommand extends GameCommand{
 
 	private int areaId;
+	private Player player;
+	private int originalAmount;
 	private int amount;
 	
 	public NewArmyCommand(BattleState game, int areaId, int amount) {
 		super(game);
 		this.areaId = areaId;
 		this.amount = amount;
+		this.originalAmount = amount;
+		player = game.getAreas().get(areaId).getPlayer();
 	}
 	
 	public void update() {
@@ -21,6 +26,8 @@ public class NewArmyCommand extends GameCommand{
 	
 	public void finish() {
 		super.finish();
+		player.setArmiesToDistribute(player.getArmiesToDistribute()-originalAmount);
+		game.addLog(player.getName() + " distributed " + originalAmount + " armies to " + game.getAreas().get(areaId).getName() + "!");
 	}
 
 }

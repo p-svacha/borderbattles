@@ -17,6 +17,7 @@ public class Player {
 	protected ArrayList<Area> areas;				//the areas that belong to this player
 	protected boolean active;						//true when its this players turn
 	protected boolean dead;
+	protected int armiesToDistribute;
 	
 	//borderAttacker.get(i) ONLY belongs to borderDefender.get(i)!!!!dont use different index for the 2 lists.
 	protected ArrayList<Area> borderAttacker;		//Used for possible attacks. Only own areas with an army > 1.
@@ -58,7 +59,9 @@ public class Player {
 	/**
 	 * Starts the turn of this player, giving him new armies.
 	 */
-	public void startTurn() {}
+	public void startTurn() {
+		armiesToDistribute = areas.size();
+	}
 	
 	/**
 	 * AI Players do their turn. 
@@ -86,11 +89,14 @@ public class Player {
 	public void setColor(Color color) { this.color = color; }
 	public void setActive(boolean active) { this.active = active; }
 	public void setDead(boolean dead) { this.dead = dead; }
+	public void setArmiesToDistribute(int armiesToDistribute) { this.armiesToDistribute = armiesToDistribute; }
 	
 	public String getName() { return name; }
 	public Color getColor() { return color; }
 	public boolean getActive() { return active; }
 	public boolean getDead() { return dead; }
+	public boolean isHuman() { return human; }
+	public int getArmiesToDistribute() { return armiesToDistribute; }
 	public Color getFrameColor() { return frameColor; }
 	public ArrayList<Area> getAreas() { return areas; }
 	

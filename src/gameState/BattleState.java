@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -15,11 +14,15 @@ import java.util.Random;
 import log.EventLog;
 import map.Area;
 import player.AI1Player;
+import player.HumanPlayer;
 import player.NeutralPlayer;
 import player.Player;
+import player.PlayerController;
 import view.GamePanel;
+
 import command.AttackCommand;
 import command.GameCommand;
+import command.MoveArmyCommand;
 import command.NewArmyCommand;
 
 @SuppressWarnings("serial")
@@ -27,10 +30,12 @@ public class BattleState extends MapState{
 	
 	
 	//OPTIONS
+	private boolean FULL_SIMULATION = true;
 	private final int STARTING_ARMY = 5;
 	public final int ATTACK_CHANCE = 50; //Attack chance in % that the attacker wins a fight
-	private final int PLAYER_AMOUNT = 8;
-	private final int STARTAREA_AMOUNT = 2;
+	public final int HUMAN_PLAYERS = 1;
+	private final int AI_PLAYER_AMOUNT = 9;
+	private final int STARTAREA_AMOUNT = 3;
 	
 	private ArrayList<Area> neutralAreas;
 	private Random rnd;
@@ -39,6 +44,7 @@ public class BattleState extends MapState{
 	ArrayList<Player> players;
 	ArrayList<Player> playersByArea;
 	private int activePlayer;
+	private PlayerController playerController;	//for human turns
 	
 	private String title;
 	private EventLog log;
@@ -55,6 +61,7 @@ public class BattleState extends MapState{
 		super(gsm);
 		players = new ArrayList<Player>();
 		playersByArea = new ArrayList<Player>();
+		playerController = new PlayerController(this);
 		neutralAreas = (ArrayList<Area>) areas.clone();
 		rnd = new Random();
 		log = new EventLog();
@@ -68,7 +75,7 @@ public class BattleState extends MapState{
 		neutralPlayer = new NeutralPlayer(this);
 		
 		Player[] possiblePlayers = {
-			new AI1Player("Red", new Color(255, 0, 0), this),
+//			new AI1Player("Red", new Color(255, 0, 0), this),
 			new AI1Player("Lime", new Color(0, 255, 0), this),
 			new AI1Player("Blue", new Color(0, 0, 255), this),
 			new AI1Player("Yellow", new Color(255, 255, 0), this),
@@ -90,7 +97,10 @@ public class BattleState extends MapState{
 			new AI1Player("Brown", new Color(139, 69, 19), this),
 		};
 		
-		for(int i = 0; i < PLAYER_AMOUNT; i++) {
+		for(int i = 0; i < HUMAN_PLAYERS; i++) {
+			players.add(new HumanPlayer("YOU", Color.RED, this));
+		}
+		for(int i = 0; i < AI_PLAYER_AMOUNT; i++) {
 			int rng = rnd.nextInt(possiblePlayers.length);
 			while(players.contains(possiblePlayers[rng])) {
 				rng = rnd.nextInt(possiblePlayers.length);
@@ -104,7 +114,7 @@ public class BattleState extends MapState{
 		}
 		
 		for(int i = 0; i < STARTAREA_AMOUNT; i++) {
-			for(int j = 0; j < PLAYER_AMOUNT; j++) {
+			for(int j = 0; j < AI_PLAYER_AMOUNT+HUMAN_PLAYERS; j++) {
 				int rng = rnd.nextInt(neutralAreas.size());
 				players.get(j).addArea(neutralAreas.get(rng));
 				neutralAreas.get(rng).setArmy(STARTING_ARMY);
@@ -114,12 +124,16 @@ public class BattleState extends MapState{
 		}
 		
 		players.get(activePlayer).startTurn();
+		if(humanTurn = players.get(activePlayer).isHuman()) playerController.start(players.get(activePlayer));
 	}
 	
 	@SuppressWarnings("unchecked")
 	@Override
 	public void update() {
-		//Update Players
+		//Human
+		if(humanTurn) playerController.update();
+		
+		//AI
 		super.update();
 		neutralPlayer.update();
 		ArrayList<Player> toRemove = new ArrayList<Player>();
@@ -166,11 +180,17 @@ public class BattleState extends MapState{
 			if(!animationRunning) log.addLog(players.get(0).getName() + " wins!");
 			animationRunning = true;
 		}
+		
+		//Simulation
+		if(FULL_SIMULATION && !animationRunning && !humanTurn) players.get(activePlayer).doTurn();
 	}
 	
 	@Override
 	public void draw(Graphics2D g) {
 		super.draw(g);
+		if(humanTurn) playerController.draw(g);
+		g.setColor(Color.WHITE);
+		g.setFont(textFont);
 		if(mouseArea >= 0) {
 			g.drawString("Player: " + areas.get(mouseArea).getPlayer().getName(), 10, 880);
 			g.drawString("Size: " + areas.get(mouseArea).getSize(), 10, 900);
@@ -195,7 +215,7 @@ public class BattleState extends MapState{
 		areas.get(defenderArea).getPlayer().removeArea(areas.get(defenderArea));
 		areas.get(defenderArea).setPlayer(players.get(activePlayer));
 		players.get(activePlayer).addArea(areas.get(defenderArea));
-		int movingArmy = areas.get(attackerArea).getArmy()/2;
+		int movingArmy = areas.get(attackerArea).getArmy()-1;
 		areas.get(attackerArea).setArmy(areas.get(attackerArea).getArmy()-movingArmy);
 		areas.get(defenderArea).setArmy(movingArmy);
 	}
@@ -204,30 +224,28 @@ public class BattleState extends MapState{
 	 * Area with id attackerArea attacks the area with id defenderArea.
 	 * Every army fights 1v1 with 50% chance to win until one the attacker 1 army left
 	 * or the defender has 0 armies left.
-	 * Returns if the attack was successful.
+	 * Should only be called by players.
 	 */
 	public void attackArea(int attackerArea, int defenderArea) {
 		commands.add(new AttackCommand(this, attackerArea, defenderArea));
 	}
 	
 	/**
-	 * Moves amount armies from area with id areaFrom to area with id areaTo.
+	 * Adds a MoveArmyCommand to the CommandQueue, which moves amount armies from area with id areaFrom to area with id areaTo.
 	 * Should only be called by Players.
 	 * Does check preconditions, check your console!
 	 */
-	public void moveArmy(int areaFrom, int areaTo, int amount) {
+	public void moveArmy(int areaFrom, int areaTo) {
 		if(areas.get(areaFrom).getPlayer() != players.get(activePlayer)) System.err.println("CRITICAL ERROR IN ARMY MOVEMENT: AREA_FROM DOESNT BELONG TO THE ACTIVE PLAYER");
 		if(areas.get(areaTo).getPlayer() != players.get(activePlayer)) System.err.println("CRITICAL ERROR IN ARMY MOVEMENT: AREA_TO DOESNT BELONG TO THE ACTIVE PLAYER");
-		if(areas.get(areaFrom).getArmy() <= amount) System.err.println("CRITICAL ERROR IN ARMY MOVEMENT: NOT ENOUGH ARMIES IN AREA_FROM TO MOVE");
+		if(areas.get(areaFrom).getArmy() <= 1) System.err.println("CRITICAL ERROR IN ARMY MOVEMENT: NOT ENOUGH ARMIES IN AREA_FROM TO MOVE");
 		
-		areas.get(areaFrom).setArmy(areas.get(areaFrom).getArmy()-amount);
-		areas.get(areaTo).setArmy(areas.get(areaTo).getArmy()+amount);
-		log.addLog(areas.get(areaFrom).getPlayer().getName() + " has moved " + amount + " armies from " 
-				+ areas.get(areaFrom).getName() + " to " + areas.get(areaTo).getName() + "!");
+		commands.add(new MoveArmyCommand(this, areaFrom, areaTo));
 	}
 	
 	/**
 	 * Adds a NewArmyCommand to the CommandQueue to add amount new armies to the area with id areaid.
+	 * Should only be called by players.
 	 * Does check preconditions, check your console!
 	 */
 	public void addNewArmy(int areaId, int amount) {
@@ -241,10 +259,11 @@ public class BattleState extends MapState{
 	 * Should be called by the active player to end his turn.
 	 */
 	public void endTurn() {
-		update();
+		addLog(players.get(activePlayer).getName() + " ended his turn!");
 		if(activePlayer == players.size() -1) activePlayer = 0;
 		else activePlayer++;
 		players.get(activePlayer).startTurn();
+		if(humanTurn = players.get(activePlayer).isHuman()) playerController.start(players.get(activePlayer));
 	}
 	
 	/**
@@ -259,12 +278,13 @@ public class BattleState extends MapState{
 	@Override
 	public void keyPressed(KeyEvent k) {
 		super.keyPressed(k);
-		if(k.getKeyCode() == KeyEvent.VK_SPACE && !animationRunning) players.get(activePlayer).doTurn();
+		if(k.getKeyCode() == KeyEvent.VK_SPACE && !FULL_SIMULATION && !animationRunning) players.get(activePlayer).doTurn();
+		if(humanTurn) playerController.KeyPressed(k);
 	}
 	
 	@Override
 	public void mouseClicked(MouseEvent m) {
-		
+		if(humanTurn) playerController.mouseClicked(m);
 	}
 	
 	public ArrayList<Area> getAreas() { return areas; }

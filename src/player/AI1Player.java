@@ -17,10 +17,12 @@ public class AI1Player extends Player{
 
 	
 	public void startTurn() {
-		int newArmy = areas.size();
-		for(int i = 0; i < newArmy; i++) {
-			int rng = rnd.nextInt(areas.size());
-			game.addNewArmy(areas.get(rng).getId(), 1);
+		super.startTurn();
+		while(armiesToDistribute > 0) {
+			int rngAmount = rnd.nextInt(armiesToDistribute)+1;
+			int rngArea = rnd.nextInt(areas.size());
+			game.addNewArmy(areas.get(rngArea).getId(), rngAmount);
+			armiesToDistribute -= rngAmount;
 		}
 	}
 	
@@ -29,7 +31,7 @@ public class AI1Player extends Player{
 			if(!a.hasEnemyBorders() && a.getArmy() > 5) {
 				for(Area n : a.getNeighbours()) {
 					if(n.hasEnemyBorders()) {
-						game.moveArmy(a.getId(), n.getId(), a.getArmy()-1);
+						game.moveArmy(a.getId(), n.getId());
 						break;
 					}
 				}
@@ -47,7 +49,6 @@ public class AI1Player extends Player{
 			game.attackArea(borderAttacker.get(rng).getId(), borderDefender.get(rng).getId());
 		}
 		else {
-			game.addLog(name + " ended his turn!");
 			game.endTurn();	
 		}
 		

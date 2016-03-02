@@ -20,7 +20,6 @@ import javax.imageio.ImageIO;
 
 import map.Area;
 import map.FloodFiller;
-import player.NeutralPlayer;
 import player.Player;
 import view.GamePanel;
 
@@ -54,7 +53,7 @@ public class MapState extends GameState {
 	
 	public MapState(GameStateManager gsm){
 		this.gsm = gsm;
-		mapName = "switzerland";
+		mapName = "ornament1";
 		
 		clickedArea = FloodFiller.VOID_PIXEL;
 		
@@ -147,7 +146,7 @@ public class MapState extends GameState {
 			String line;
 			int areaId = 0;
 			while((line = reader.readLine()) != null) {
-				String[] attributes = line.split(" ");
+				String[] attributes = line.split(",");
 				areas.get(areaId).setName(attributes[1]);
 				areas.get(areaId).setCenter(new Point(Integer.parseInt(attributes[2]), Integer.parseInt(attributes[3])));
 				for(int i = 4; i < attributes.length; i++) {
@@ -178,12 +177,12 @@ public class MapState extends GameState {
 			StringBuilder sb;
 			for(Area a : areas) {
 				sb = new StringBuilder();
-				sb.append(a.getId() + " NameNotYetSet ");
-				sb.append(a.getAreaPoints().iterator().next().x + " " + a.getAreaPoints().iterator().next().y + " ");
+				sb.append(a.getId() + ",NameNotYetSet,");
+				sb.append(a.getAreaPoints().iterator().next().x + "," + a.getAreaPoints().iterator().next().y + ",");
 				a.setCenter(new Point(a.getAreaPoints().iterator().next().x, a.getAreaPoints().iterator().next().y));
 				a.setName("NameNotYetSet");
 				for(Area n : a.getNeighbours()) {
-					sb.append(n.getId() + " ");
+					sb.append(n.getId() + ",");
 				}
 				writer.write(sb.toString());
 				writer.newLine();
@@ -276,10 +275,17 @@ public class MapState extends GameState {
 	}
 	
 	/**
-	 * Returns true, if the area does NOT belong to Player p, but does belong to another not-neutral player.
+	 * Returns true, if the area does NOT belong to Player p.
 	 */
-	public boolean mouseOnAreaOfEnemyOf(Player p) {
-		return mouseOnArea() && areas.get(mouseArea).getPlayer() != p && !(areas.get(mouseArea).getPlayer() instanceof NeutralPlayer);
+	public boolean mouseOnAreaNotOf(Player p) {
+		return mouseOnArea() && areas.get(mouseArea).getPlayer() != p;
+	}
+	
+	/**
+	 * Returns if the area where the mouse is currently over is adjacent to the area with areaId.
+	 */
+	public boolean mouseOnAreaAdjacentTo(int areaId) {
+		return mouseOnArea() && areas.get(mouseArea).getNeighbours().contains(areas.get(areaId));
 	}
 	
 	public void keyPressed(KeyEvent k) {

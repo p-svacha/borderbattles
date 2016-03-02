@@ -1,0 +1,9 @@
+Pre-Alpha 0.01 (02.03.2016)
+-----------------------
+- Human players implemented (game is actually playable now)
+- Simulation can now be en- and disabled (if enabled, you have to press space for the AI to make a turn)
+- Moving and distributing armies are now actual game commands
+- Area names can now have spaces
+- Hotkeys for editor mode added (enter for set name, c for set center)
+- New map: ornament1
+- Fixed a bug where you could add the same neighbour several times in the editor
