@@ -1,0 +1,27 @@
+0 Schaffhausen 454 167 1 2 
+1 Thurgau 536 208 0 2 6 
+2 Zürich 470 240 0 1 3 6 14 15 
+3 Aargau 392 241 12 14 2 5 8 11 
+4 Basel-Stadt 294 209 5 
+5 Basel-Land 325 242 4 3 8 7 
+6 St.Gallen 545 292 1 9 2 10 13 15 16 18 
+7 Jura 222 263 5 11 17 8 
+8 Solothurn 305 270 5 3 11 7 
+9 Appenzell-Ausserhoden 580 265 10 6 
+10 Appenzell-Innerhoden 599 276 9 6 
+11 Befsdfsdfsdf 292 394 8 12 7 3 19 17 24 22 21 23 
+12 Luzern 376 337 3 11 21 15 14 
+13 Liechtenstein 632 313 6 18 
+14 Zug 462 314 15 12 3 2 
+15 Schwyz 492 343 22 12 14 16 6 2 
+16 Glarus 544 358 22 18 15 6 
+17 Neuenburg 155 353 23 11 7 
+18 Graubünden 622 425 6 16 22 13 25 
+19 Freiburg 203 423 11 23 
+20 Nidwalden 432 372 21 22 
+21 Obwalden 397 396 20 12 11 22 
+22 Uri 465 415 16 20 15 18 24 11 21 25 
+23 Waadt 105 444 17 19 11 24 26 
+24 Wallis 301 563 22 11 23 25 
+25 Tessin 496 522 18 24 22 
+26 Genf 35 553 23 
