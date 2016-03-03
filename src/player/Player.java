@@ -39,21 +39,26 @@ public class Player {
 	
 	public void update() {
 		if(!dead) {
-			borderAttacker.clear();
-			borderDefender.clear();
-			for(Area a : areas) {
-				if(a.getArmy() > 1) {
-					for(Area n : a.getNeighbours()) {
-						if(!areas.contains(n)) {
-							borderAttacker.add(a);
-							borderDefender.add(n);
-						}
-					}
-				}
-			}
-			if(borderAttacker.size() != borderDefender.size()) System.err.println("CRITICAL ERROR IN FINDING POSSIBLE ATTACKS!!!");
+			findPossibleAttacks();
 			dead = areas.isEmpty();
 		}
+	}
+	
+	protected void findPossibleAttacks() {
+		borderAttacker.clear();
+		borderDefender.clear();
+		for(Area a : areas) {
+			if(a.getArmy() > 1) {
+				for(Area n : a.getNeighbours()) {
+					if(!areas.contains(n)) {
+						borderAttacker.add(a);
+						borderDefender.add(n);
+					}
+					
+				}
+			}
+		}
+		if(borderAttacker.size() != borderDefender.size()) System.err.println("CRITICAL ERROR IN FINDING POSSIBLE ATTACKS!!!");
 	}
 	
 	/**

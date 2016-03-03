@@ -7,8 +7,6 @@ import java.awt.Color;
 import map.Area;
 
 public class AI1Player extends Player{
-
-
 	
 	public AI1Player(String name, Color color, BattleState game) {
 		super(name, color, game);

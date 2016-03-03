@@ -1,5 +1,5 @@
 Pre-Alpha 0.01 (02.03.2016)
------------------------
+---------------------------
 - Human players implemented (game is actually playable now)
 - Simulation can now be en- and disabled (if enabled, you have to press space for the AI to make a turn)
 - Moving and distributing armies are now actual game commands
@@ -7,3 +7,13 @@ Pre-Alpha 0.01 (02.03.2016)
 - Hotkeys for editor mode added (enter for set name, c for set center)
 - New map: ornament1
 - Fixed a bug where you could add the same neighbour several times in the editor
+
+Pre-Alpha 0.02 (03.03.2016)
+---------------------------
+- Human Players can now distribute multiple armies at once by scrolling
+- New AI (harder and more intelligent than before)
+- All maps can now be zoomed in up to 400x400
+- Fixed performance issues with solothurn and switzerland maps
+- Other improvements to solothurn map
+- Starting armies on neutral areas are now configurable
+

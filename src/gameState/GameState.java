@@ -3,6 +3,7 @@ package gameState;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 
 import javax.swing.JPanel;
 
@@ -22,5 +23,6 @@ public abstract class GameState extends JPanel {
 	public abstract void mousePressed(MouseEvent m);
 	public abstract void mouseReleased(MouseEvent m);
 	public abstract void mouseClicked(MouseEvent m);
+	public abstract void mouseWheelMoved(MouseWheelEvent m);
 
 }

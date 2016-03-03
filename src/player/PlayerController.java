@@ -7,6 +7,7 @@ import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 
 import javax.swing.SwingUtilities;
 
@@ -40,7 +41,7 @@ public class PlayerController {
 		switch(mode) {
 		case DISTRIBUTE_ARMY:
 			action = "Chose one of your areas to put your new armies!";
-			action2 = "Scroll to change the amount!";
+			action2 = "Scroll to change the amount (currently " + distributionAmount + ")!";
 			action3 = "You can distribute " + player.getArmiesToDistribute() + " more armies!";
 			break;
 			
@@ -91,6 +92,15 @@ public class PlayerController {
 				game.getAreas().get(selectedArea).highlight(false);
 				mode = FREE_MODE;
 			}
+		}
+	}
+	
+	public void mouseWheelMoved(MouseWheelEvent m) {
+		if(mode == DISTRIBUTE_ARMY) {
+			int noches = -1*m.getWheelRotation();
+			if(distributionAmount + noches > player.getArmiesToDistribute()) distributionAmount = player.getArmiesToDistribute();
+			else if(distributionAmount + noches <= 0) distributionAmount = 1;
+			else distributionAmount += noches;
 		}
 	}
 	

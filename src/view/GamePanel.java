@@ -11,11 +11,13 @@ import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
+import java.awt.event.MouseWheelEvent;
+import java.awt.event.MouseWheelListener;
 import java.awt.image.BufferedImage;
 
 import javax.swing.JPanel;
 
-public class GamePanel extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener{
+public class GamePanel extends JPanel implements Runnable, KeyListener, MouseListener, MouseMotionListener, MouseWheelListener{
 
 	private static final long serialVersionUID = -7804795314443379967L;
 	
@@ -63,6 +65,7 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseLis
 			addKeyListener(this);
 			addMouseMotionListener(this);
 			addMouseListener(this);
+			addMouseWheelListener(this);
 			thread.start();
 		}
 	}
@@ -174,6 +177,10 @@ public class GamePanel extends JPanel implements Runnable, KeyListener, MouseLis
 	public void mouseExited(MouseEvent m) {}
 	public void mouseClicked(MouseEvent m) {
 		gsm.mouseClicked(m);
+	}
+
+	public void mouseWheelMoved(MouseWheelEvent m) {
+		gsm.mouseWheelMoved(m);
 	}
 
 	

@@ -47,7 +47,7 @@ public class EditorState extends MapState {
 					replaceAreaNameInTxt(clickedArea, nameField.getText());
 					requestFocus();
 				}
-				else if(k.getKeyCode() == KeyEvent.VK_MULTIPLY) {
+				else if(k.getKeyCode() == KeyEvent.VK_MINUS) {
 					mouseMode = MOUSE_CENTER_SELECTION_MODE;
 					requestFocus();
 					Game.mainPanel.setCursor(new Cursor(Cursor.HAND_CURSOR));

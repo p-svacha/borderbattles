@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,7 +14,7 @@ import java.util.Random;
 
 import log.EventLog;
 import map.Area;
-import player.AI1Player;
+import player.AI2Player;
 import player.HumanPlayer;
 import player.NeutralPlayer;
 import player.Player;
@@ -32,10 +33,11 @@ public class BattleState extends MapState{
 	//OPTIONS
 	private boolean FULL_SIMULATION = true;
 	private final int STARTING_ARMY = 5;
+	private final int NEUTRAL_ARMY = 3;
 	public final int ATTACK_CHANCE = 50; //Attack chance in % that the attacker wins a fight
 	public final int HUMAN_PLAYERS = 1;
-	private final int AI_PLAYER_AMOUNT = 9;
-	private final int STARTAREA_AMOUNT = 3;
+	private final int AI_PLAYER_AMOUNT = 19;
+	private final int STARTAREA_AMOUNT = 1;
 	
 	private ArrayList<Area> neutralAreas;
 	private Random rnd;
@@ -75,26 +77,26 @@ public class BattleState extends MapState{
 		neutralPlayer = new NeutralPlayer(this);
 		
 		Player[] possiblePlayers = {
-//			new AI1Player("Red", new Color(255, 0, 0), this),
-			new AI1Player("Lime", new Color(0, 255, 0), this),
-			new AI1Player("Blue", new Color(0, 0, 255), this),
-			new AI1Player("Yellow", new Color(255, 255, 0), this),
-			new AI1Player("Magenta", new Color(255, 0, 255), this), //5
-			new AI1Player("Cyan", new Color(0, 255, 255), this),
-			new AI1Player("Green", new Color(0, 128, 0), this),
-			new AI1Player("Maroon", new Color(128, 0, 0), this),
-			new AI1Player("Navy", new Color(0, 0, 128), this),
-			new AI1Player("Orange", new Color(255, 128, 0), this), //10
-			new AI1Player("Indigo", new Color(75, 0, 130), this),
-			new AI1Player("Teal", new Color(0, 128, 128), this),
-			new AI1Player("Salmon", new Color(250, 128, 114), this),
-			new AI1Player("Olive", new Color(128, 128, 0), this),
-			new AI1Player("Silver", new Color(192, 192, 192), this), //15
-			new AI1Player("Gray", new Color(128, 128, 128), this),
-			new AI1Player("Purple", new Color(128, 0, 128), this),
-			new AI1Player("Rosy", new Color(188, 143, 143), this),
-			new AI1Player("Khaki", new Color(189, 183, 107), this),
-			new AI1Player("Brown", new Color(139, 69, 19), this),
+			new AI2Player("Red", new Color(255, 0, 0), this),
+			new AI2Player("Lime", new Color(0, 255, 0), this),
+			new AI2Player("Blue", new Color(0, 0, 255), this),
+			new AI2Player("Yellow", new Color(255, 255, 0), this),
+			new AI2Player("Magenta", new Color(255, 0, 255), this), //5
+			new AI2Player("Cyan", new Color(0, 255, 255), this),
+			new AI2Player("Green", new Color(0, 128, 0), this),
+			new AI2Player("Maroon", new Color(128, 0, 0), this),
+			new AI2Player("Navy", new Color(0, 0, 128), this),
+			new AI2Player("Orange", new Color(255, 128, 0), this), //10
+			new AI2Player("Indigo", new Color(75, 0, 130), this),
+			new AI2Player("Teal", new Color(0, 128, 128), this),
+			new AI2Player("Salmon", new Color(250, 128, 114), this),
+			new AI2Player("Olive", new Color(128, 128, 0), this),
+			new AI2Player("Silver", new Color(192, 192, 192), this), //15
+			new AI2Player("Gray", new Color(128, 128, 128), this),
+			new AI2Player("Purple", new Color(128, 0, 128), this),
+			new AI2Player("Rosy", new Color(188, 143, 143), this),
+			new AI2Player("Khaki", new Color(189, 183, 107), this),
+			new AI2Player("Brown", new Color(139, 69, 19), this),
 		};
 		
 		for(int i = 0; i < HUMAN_PLAYERS; i++) {
@@ -111,6 +113,7 @@ public class BattleState extends MapState{
 		for(Area a : areas) {
 			a.setPlayer(neutralPlayer);
 			neutralPlayer.addArea(a);
+			a.setArmy(NEUTRAL_ARMY);
 		}
 		
 		for(int i = 0; i < STARTAREA_AMOUNT; i++) {
@@ -130,11 +133,16 @@ public class BattleState extends MapState{
 	@SuppressWarnings("unchecked")
 	@Override
 	public void update() {
+		super.update();
+		
 		//Human
 		if(humanTurn) playerController.update();
+		Player currentPlayer = players.get(activePlayer);
+		
+		//Statistics
+		title = players.get(activePlayer).getName().toUpperCase() + "'S TURN";
 		
 		//AI
-		super.update();
 		neutralPlayer.update();
 		ArrayList<Player> toRemove = new ArrayList<Player>();
 		for(int i = 0; i < players.size(); i++) {
@@ -143,14 +151,15 @@ public class BattleState extends MapState{
 			if(players.get(i).getDead()) {
 				toRemove.add(players.get(i));
 				log.addLog(players.get(i).getName() + " DIED!");
+				System.out.println(players.get(i).getName() + " DIED!");
 			}
 		}
-		Player currentPlayer = players.get(activePlayer);
 		players.removeAll(toRemove);
 		for(int i = 0; i < players.size(); i++) {
 			if(players.get(i) == currentPlayer) activePlayer = i;
 		}
-		title = players.get(activePlayer).getName().toUpperCase() + "'S TURN";
+		
+		
 		
 		//Sort players for statistics
 		playersByArea = (ArrayList<Player>) players.clone();
@@ -177,7 +186,10 @@ public class BattleState extends MapState{
 		
 		//Check win
 		if(players.size() == 1) {
-			if(!animationRunning) log.addLog(players.get(0).getName() + " wins!");
+			if(!animationRunning) {
+				log.addLog(players.get(0).getName() + " WINS!");
+				System.out.println(players.get(0).getName() + " WINS!");
+			}
 			animationRunning = true;
 		}
 		
@@ -285,6 +297,11 @@ public class BattleState extends MapState{
 	@Override
 	public void mouseClicked(MouseEvent m) {
 		if(humanTurn) playerController.mouseClicked(m);
+	}
+	
+	@Override
+	public void mouseWheelMoved(MouseWheelEvent m) {
+		if(humanTurn) playerController.mouseWheelMoved(m);
 	}
 	
 	public ArrayList<Area> getAreas() { return areas; }

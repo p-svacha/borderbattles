@@ -3,6 +3,7 @@ package gameState;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 
 import view.Game;
@@ -83,6 +84,10 @@ public class GameStateManager {
 	
 	public void mouseClicked(MouseEvent m) {
 		currentState.mouseClicked(m);
+	}
+	
+	public void mouseWheelMoved(MouseWheelEvent m) {
+		currentState.mouseWheelMoved(m);
 	}
 	
 	

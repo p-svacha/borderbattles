@@ -8,6 +8,7 @@ import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.awt.event.MouseEvent;
+import java.awt.event.MouseWheelEvent;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -32,6 +33,8 @@ public class MapState extends GameState {
 	protected String mapName;
 	
 	protected BufferedImage map;
+	protected BufferedImage mapx2;	
+	
 	protected int xCoord, yCoord;	//current position of mouse ON MAP, -1 for outside of screen
 	protected double imgScale;			//zoom level, 1 default, 2 zoomed in
 	protected int xOffset, yOffset;	//distance from left / top border in pixel
@@ -53,7 +56,7 @@ public class MapState extends GameState {
 	
 	public MapState(GameStateManager gsm){
 		this.gsm = gsm;
-		mapName = "ornament1";
+		mapName = "switzerland";
 		
 		clickedArea = FloodFiller.VOID_PIXEL;
 		
@@ -110,6 +113,7 @@ public class MapState extends GameState {
 		try {
 			map = ImageIO.read(new File("res/maps/"+mapName+".png"));
 		} catch(Exception e) { e.printStackTrace(); }
+		
 		
 		imgScale = MAP_DISPLAY_SIZE / map.getWidth();
 		
@@ -201,9 +205,9 @@ public class MapState extends GameState {
 
 	public void update() {
 		for(int i = 0; i < SCROLL_SPEED; i++) {
-			if(mapMoveRight && xOffset < map.getWidth()*imgScale-MAP_DISPLAY_SIZE) xOffset++;
+			if(mapMoveRight && xOffset < map.getWidth()-MAP_DISPLAY_SIZE/imgScale) xOffset++;
 			if(mapMoveLeft && xOffset > 0) xOffset--;
-			if(mapMoveDown && yOffset < map.getHeight()*imgScale-MAP_DISPLAY_SIZE) yOffset++;
+			if(mapMoveDown && yOffset < map.getHeight()-MAP_DISPLAY_SIZE/imgScale) yOffset++;
 			if(mapMoveUp && yOffset > 0) yOffset--;
 		}
 		xCoord = (int) (GameStateManager.mouseX/imgScale+xOffset);
@@ -220,7 +224,10 @@ public class MapState extends GameState {
 		g.setColor(Color.BLACK);
 		g.setFont(textFont);
 		g.fillRect(0, 0, GamePanel.WIDTH, GamePanel.HEIGHT);
-		if(imgScale >= 1) g.drawImage(map.getSubimage(xOffset, yOffset, MAP_DISPLAY_SIZE, MAP_DISPLAY_SIZE), 0, 0, MAP_DISPLAY_SIZE, MAP_DISPLAY_SIZE, null);
+		if(imgScale >= 1) {
+			BufferedImage toDraw = map.getSubimage(xOffset, yOffset, MAP_DISPLAY_SIZE/(int)imgScale, MAP_DISPLAY_SIZE/(int)imgScale);
+			g.drawImage(toDraw, 0, 0, toDraw.getWidth()*(int)imgScale, toDraw.getHeight()*(int)imgScale, null);
+		}
 		else g.drawImage(map, 0, 0, MAP_DISPLAY_SIZE, MAP_DISPLAY_SIZE, null);
 		for(Area a : areas) {
 			if(new Rectangle(xOffset, yOffset, (int) (MAP_DISPLAY_SIZE/imgScale), (int) (MAP_DISPLAY_SIZE/imgScale)).contains(a.getCenter())) {
@@ -250,13 +257,14 @@ public class MapState extends GameState {
 			imgScale /= 2;
 			xOffset = 0;
 			yOffset = 0;
+			System.out.println("Scale: " +imgScale);
 		}
 	}
 	
 	private void zoomIn() {
-		if(imgScale < 1) {
+		if(map.getWidth()*imgScale <= MAP_DISPLAY_SIZE*2 && imgScale <= 1) {
 			imgScale *= 2;
-			System.out.println("zoomin");
+			System.out.println("Scale: " +imgScale);
 		}
 	}
 	
@@ -301,6 +309,7 @@ public class MapState extends GameState {
 	public void mousePressed(MouseEvent m) {}
 	public void mouseReleased(MouseEvent m) {}
 	public void mouseClicked(MouseEvent m) {}
+	public void mouseWheelMoved(MouseWheelEvent m) {}
 	
 	public BufferedImage getMap() { return map; }
 	public int getMouseArea() { return mouseArea; }
